@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "30cc1ee7-44d9-47b0-86b4-ba80cb8f9b8a"
+      }
+    },
+    "android": {
+      "package": "com.aorborc.cooper_worker_app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "FOREGROUND_SERVICE",
+        "ACCESS_BACKGROUND_LOCATION"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.aorborc.cooperworkerapp",
+      "infoPlist": {
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app requires location services to track your movements in the background.",
+        "NSLocationWhenInUseUsageDescription": "This app uses your location to track your activities."
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/30cc1ee7-44d9-47b0-86b4-ba80cb8f9b8a"
+    }
+  }
+}
