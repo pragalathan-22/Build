@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 
 import { useTranslation } from 'react-i18next';
 import Header from '../components/header';
 import { SafeAreaView } from 'react-native-safe-area-context';
-export default function ProfileScreen() {
+
+export default function ProfileScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const [name, setName] = useState('John Doe');
   const [email, setEmail] = useState('john.doe@example.com');
@@ -14,11 +15,15 @@ export default function ProfileScreen() {
     i18n.changeLanguage(lng);
   };
 
+  const handleLogout = () => {
+    // Add logic to logout (clear tokens, reset state, etc.)
+    navigation.navigate('AuthStack', { screen: 'Auth' }); // Navigate to the AuthScreen
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <Header title={t('Profile')} />
       <ScrollView style={styles.container}>
-        {/* <Text style={styles.title}>{t('profile')}</Text> */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>{t('name')}</Text>
           <TextInput
@@ -59,28 +64,15 @@ export default function ProfileScreen() {
           />
         </View>
 
-        {/* <View style={styles.languageContainer}>
-          <Text style={styles.label}>{t('language')}</Text>
-          <View style={styles.languageButtons}>
-            <TouchableOpacity
-              style={[styles.languageButton, i18n.language === 'en' && styles.activeLanguage]}
-              onPress={() => changeLanguage('en')}
-            >
-              <Text style={[styles.languageButtonText, i18n.language === 'en' && styles.activeButtonText]}>English</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.languageButton, i18n.language === 'es' && styles.activeLanguage]}
-              onPress={() => changeLanguage('es')}
-            >
-              <Text style={[styles.languageButtonText, i18n.language === 'es' && styles.activeButtonText]}>Español</Text>
-            </TouchableOpacity>
-          </View>
-        </View> */}
-
         <TouchableOpacity style={styles.saveButton}>
           <Text style={styles.saveButtonText}>{t('saveChanges')}</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Logout Button at the Bottom */}
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutButtonText}>{t('logout')}</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -93,12 +85,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 20,
   },
   inputContainer: {
     marginBottom: 20,
@@ -127,35 +113,6 @@ const styles = StyleSheet.create({
     height: 100,
     textAlignVertical: 'top',
   },
-  languageContainer: {
-    marginTop: 20,
-  },
-  languageButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  languageButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderWidth: 1,
-    borderColor: '#007AFF',
-    borderRadius: 8,
-    width: '48%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  activeLanguage: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-  },
-  languageButtonText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  activeButtonText: {
-    color: 'white',
-  },
   saveButton: {
     backgroundColor: '#007AFF',
     paddingVertical: 15,
@@ -172,5 +129,21 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  logoutButton: {
+    backgroundColor: '#34C759', // Green color for logout button
+    paddingVertical: 10, // Smaller padding
+    borderRadius: 8,
+    marginTop: 20,
+    alignItems: 'center',
+    position: 'absolute', // Fixed position at the bottom
+    bottom: 10, // 10px from the bottom
+    width: '30%', // Full width
+    alignSelf: 'center', // Center the button
+  },
+  logoutButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });

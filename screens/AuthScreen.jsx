@@ -1,92 +1,138 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Icon package for eye and other icons
-import { FontAwesome } from '@expo/vector-icons'; // For Google icon
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  Alert,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
+import { auth } from '../Firebase/firebaseConfig';
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithCredential,
+} from 'firebase/auth';
+import * as Google from 'expo-auth-session/providers/google';
 
-export default function AuthScreen({ onLogin }) {
+export default function AuthScreen({ navigation, onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [passwordVisible, setPasswordVisible] = useState(false); // State to toggle password visibility
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    expoClientId: '600897337641-6r0prkm91vv2rsrbcrsfsaapb5da3edd.apps.googleusercontent.com',
+    androidClientId: '600897337641-6r0prkm91vv2rsrbcrsfsaapb5da3edd.apps.googleusercontent.com',
+    webClientId: '600897337641-6r0prkm91vv2rsrbcrsfsaapb5da3edd.apps.googleusercontent.com',
+  });
 
-  const handleEmailLogin = () => {
-    // Implement email/password login logic here
-    onLogin();
-  };
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { id_token } = response.authentication;
+      const credential = GoogleAuthProvider.credential(id_token);
+      signInWithCredential(auth, credential)
+        .then(() => {
+          onLogin();
+        })
+        .catch((error) => {
+          console.error(error);
+          Alert.alert(
+            'Google Login Failed',
+            'Something went wrong with Google authentication.'
+          );
+        });
+    }
+  }, [response]);
 
-  const handleGoogleLogin = async () => {
-    const result = await promptAsync();
-    if (result.type === 'success') {
-      // Handle successful Google login
+  const handleEmailLogin = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
       onLogin();
+    } catch (error) {
+      console.error(error.message);
+      Alert.alert('Login Failed', 'Incorrect email or password.');
     }
   };
 
+  const handleGoogleLogin = async () => {
+    await promptAsync();
+  };
+
+  const navigateToSignup = () => {
+    navigation.navigate('Signup');
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Logo */}
-      <Image source={require('../assets/icons/CooperBuild-Logo-Header-1024x294.png')} style={styles.logo} />
-      
-      {/* Welcome text */}
-      <Text style={styles.welcomeText}>Welcome to Cooper Build</Text>
-      
-      {/* Email input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#aaa"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-
-      {/* Password input with eye icon */}
-      <View style={styles.passwordContainer}>
-        <TextInput
-          style={styles.passwordInput}
-          placeholder="Password"
-          placeholderTextColor="#aaa"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={!passwordVisible} // Toggle encryption
+    <View style={styles.screenContainer}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Image
+          source={require('../assets/icons/CooperBuild-Logo-Header-1024x294.png')}
+          style={styles.logo}
         />
-        <TouchableOpacity
-          style={styles.eyeIcon}
-          onPress={() => setPasswordVisible(!passwordVisible)}
-        >
-          <Ionicons
-            name={passwordVisible ? 'eye' : 'eye-off'}
-            size={20}
-            color="#aaa"
+        <Text style={styles.welcomeText}>Welcome to Cooper Build</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#aaa"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+        />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Password"
+            placeholderTextColor="#aaa"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!passwordVisible}
           />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setPasswordVisible(!passwordVisible)}
+          >
+            <Ionicons
+              name={passwordVisible ? 'eye' : 'eye-off'}
+              size={20}
+              color="#aaa"
+            />
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity style={styles.loginButton} onPress={handleEmailLogin}>
+          <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
-      </View>
+        <View style={styles.separator}>
+          <Text style={styles.orText}>OR</Text>
+        </View>
+        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+          <FontAwesome name="google" size={24} color="#333" />
+        </TouchableOpacity>
 
-      {/* Login button */}
-      <TouchableOpacity style={styles.loginButton} onPress={handleEmailLogin}>
-        <Text style={styles.loginButtonText}>Login</Text>
-      </TouchableOpacity>
-
-      {/* Divider */}
-      <View style={styles.separator}>
-        <Text style={styles.orText}>OR</Text>
-      </View>
-
-      {/* Google login button */}
-      <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
-        <FontAwesome name="google" size={24} color="#333" />
-      </TouchableOpacity>
-    </ScrollView>
+        {/* Sign Up Section */}
+        <View style={styles.signupContainer}>
+          <Text style={styles.signupText}>Don’t have an account? </Text>
+          <TouchableOpacity onPress={navigateToSignup}>
+            <Text style={styles.signupLink}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screenContainer: {
+    flex: 1,
+    backgroundColor: '#2F4561',
+  },
   container: {
     flexGrow: 1,
-    justifyContent: "flex-end",
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#2F4561', // Navy blue background
-    padding: 20,
-    paddingBottom: 80,
+    paddingHorizontal: 20,
   },
   logo: {
     width: 200,
@@ -97,24 +143,19 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#ffffff', // White text
+    color: '#ffffff',
     marginBottom: 40,
     textAlign: 'center',
   },
   input: {
     width: '90%',
     height: 50,
-    backgroundColor: '#ffffff', // White background for input
+    backgroundColor: '#ffffff',
     borderRadius: 8,
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
-    color: '#333', // Dark text
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2, // Shadow for Android
+    color: '#333',
   },
   passwordContainer: {
     flexDirection: 'row',
@@ -124,11 +165,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: 8,
     paddingHorizontal: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2, // Shadow for Android
   },
   passwordInput: {
     flex: 1,
@@ -139,9 +175,9 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   loginButton: {
-    backgroundColor: '#ff9900', // Vibrant orange
+    backgroundColor: '#ff9900',
     paddingVertical: 12,
-    paddingHorizontal: 30, // Adjust width to fit text
+    paddingHorizontal: 30,
     borderRadius: 8,
     marginTop: 20,
   },
@@ -153,7 +189,7 @@ const styles = StyleSheet.create({
   separator: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent:"center",
+    justifyContent: 'center',
     marginVertical: 20,
     width: '90%',
   },
@@ -169,10 +205,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#ffffff',
     borderRadius: 25,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+  },
+  signupContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  signupText: {
+    color: '#ffffff',
+    fontSize: 16,
+  },
+  signupLink: {
+    color: '#ff9900',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

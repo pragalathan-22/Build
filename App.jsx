@@ -22,6 +22,7 @@ import TimeIcon from './assets/icons/TimeIcon';
 import TasksIcon from './assets/icons/TasksIcon';
 import ProfileIcon from './assets/icons/ProfileIcon';
 import LocationTrackIcon from './assets/icons/LocationTrackIcon.js';
+import SignupScreen from './screens/SignupScreen.jsx';
 
 // Notifications.setNotificationHandler({
 //   handleNotification: async () => ({
@@ -101,6 +102,7 @@ export default function App() {
            
             </>
           )}
+          <Stack.Screen name='Signup' component={SignupScreen} options={{headerShown:false}}/>
         </Stack.Navigator>
       </NavigationContainer>
     </I18nextProvider>
